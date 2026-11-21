@@ -30,7 +30,13 @@ type User struct {
 	// Dob holds the value of the "dob" field.
 	Dob *time.Time `json:"dob,omitempty"`
 	// PhoneNumber holds the value of the "phone_number" field.
-	PhoneNumber string `json:"phone_number,omitempty"`
+	PhoneNumber *string `json:"phone_number,omitempty"`
+	// Email holds the value of the "email" field.
+	Email string `json:"email,omitempty"`
+	// EmailVerified holds the value of the "email_verified" field.
+	EmailVerified bool `json:"email_verified,omitempty"`
+	// IdentityVerified holds the value of the "identity_verified" field.
+	IdentityVerified bool `json:"identity_verified,omitempty"`
 	// Password holds the value of the "password" field.
 	Password string `json:"-"`
 	// Active holds the value of the "active" field.
@@ -49,9 +55,13 @@ type UserEdges struct {
 	AgentProfile *Agent `json:"agent_profile,omitempty"`
 	// Leases holds the value of the leases edge.
 	Leases []*Lease `json:"leases,omitempty"`
+	// HostedSessions holds the value of the hosted_sessions edge.
+	HostedSessions []*HostedSession `json:"hosted_sessions,omitempty"`
+	// Identities holds the value of the identities edge.
+	Identities []*UserIdentity `json:"identities,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [5]bool
 }
 
 // PropertyManagersOrErr returns the PropertyManagers value or an error if the edge
@@ -83,14 +93,32 @@ func (e UserEdges) LeasesOrErr() ([]*Lease, error) {
 	return nil, &NotLoadedError{edge: "leases"}
 }
 
+// HostedSessionsOrErr returns the HostedSessions value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) HostedSessionsOrErr() ([]*HostedSession, error) {
+	if e.loadedTypes[3] {
+		return e.HostedSessions, nil
+	}
+	return nil, &NotLoadedError{edge: "hosted_sessions"}
+}
+
+// IdentitiesOrErr returns the Identities value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) IdentitiesOrErr() ([]*UserIdentity, error) {
+	if e.loadedTypes[4] {
+		return e.Identities, nil
+	}
+	return nil, &NotLoadedError{edge: "identities"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldActive:
+		case user.FieldEmailVerified, user.FieldIdentityVerified, user.FieldActive:
 			values[i] = new(sql.NullBool)
-		case user.FieldFirstName, user.FieldLastName, user.FieldPhoneNumber, user.FieldPassword:
+		case user.FieldFirstName, user.FieldLastName, user.FieldPhoneNumber, user.FieldEmail, user.FieldPassword:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDob:
 			values[i] = new(sql.NullTime)
@@ -152,7 +180,26 @@ func (_m *User) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field phone_number", values[i])
 			} else if value.Valid {
-				_m.PhoneNumber = value.String
+				_m.PhoneNumber = new(string)
+				*_m.PhoneNumber = value.String
+			}
+		case user.FieldEmail:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field email", values[i])
+			} else if value.Valid {
+				_m.Email = value.String
+			}
+		case user.FieldEmailVerified:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field email_verified", values[i])
+			} else if value.Valid {
+				_m.EmailVerified = value.Bool
+			}
+		case user.FieldIdentityVerified:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field identity_verified", values[i])
+			} else if value.Valid {
+				_m.IdentityVerified = value.Bool
 			}
 		case user.FieldPassword:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -192,6 +239,16 @@ func (_m *User) QueryAgentProfile() *AgentQuery {
 // QueryLeases queries the "leases" edge of the User entity.
 func (_m *User) QueryLeases() *LeaseQuery {
 	return NewUserClient(_m.config).QueryLeases(_m)
+}
+
+// QueryHostedSessions queries the "hosted_sessions" edge of the User entity.
+func (_m *User) QueryHostedSessions() *HostedSessionQuery {
+	return NewUserClient(_m.config).QueryHostedSessions(_m)
+}
+
+// QueryIdentities queries the "identities" edge of the User entity.
+func (_m *User) QueryIdentities() *UserIdentityQuery {
+	return NewUserClient(_m.config).QueryIdentities(_m)
 }
 
 // Update returns a builder for updating this User.
@@ -234,8 +291,19 @@ func (_m *User) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
-	builder.WriteString("phone_number=")
-	builder.WriteString(_m.PhoneNumber)
+	if v := _m.PhoneNumber; v != nil {
+		builder.WriteString("phone_number=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	builder.WriteString("email=")
+	builder.WriteString(_m.Email)
+	builder.WriteString(", ")
+	builder.WriteString("email_verified=")
+	builder.WriteString(fmt.Sprintf("%v", _m.EmailVerified))
+	builder.WriteString(", ")
+	builder.WriteString("identity_verified=")
+	builder.WriteString(fmt.Sprintf("%v", _m.IdentityVerified))
 	builder.WriteString(", ")
 	builder.WriteString("password=<sensitive>")
 	builder.WriteString(", ")

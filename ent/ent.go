@@ -16,14 +16,19 @@ import (
 	"github.com/TechBuilder-360/Rental-API/ent/agentcommissionrule"
 	"github.com/TechBuilder-360/Rental-API/ent/commissionrecord"
 	"github.com/TechBuilder-360/Rental-API/ent/feetype"
+	"github.com/TechBuilder-360/Rental-API/ent/hostedsession"
+	"github.com/TechBuilder-360/Rental-API/ent/hostedsessiontemplate"
 	"github.com/TechBuilder-360/Rental-API/ent/lease"
 	"github.com/TechBuilder-360/Rental-API/ent/property"
 	"github.com/TechBuilder-360/Rental-API/ent/propertyfeerule"
 	"github.com/TechBuilder-360/Rental-API/ent/propertymanager"
+	"github.com/TechBuilder-360/Rental-API/ent/provider"
+	"github.com/TechBuilder-360/Rental-API/ent/service"
 	"github.com/TechBuilder-360/Rental-API/ent/structure"
 	"github.com/TechBuilder-360/Rental-API/ent/unit"
 	"github.com/TechBuilder-360/Rental-API/ent/unitpricing"
 	"github.com/TechBuilder-360/Rental-API/ent/user"
+	"github.com/TechBuilder-360/Rental-API/ent/useridentity"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -84,18 +89,23 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			agent.Table:               agent.ValidColumn,
-			agentcommissionrule.Table: agentcommissionrule.ValidColumn,
-			commissionrecord.Table:    commissionrecord.ValidColumn,
-			feetype.Table:             feetype.ValidColumn,
-			lease.Table:               lease.ValidColumn,
-			property.Table:            property.ValidColumn,
-			propertyfeerule.Table:     propertyfeerule.ValidColumn,
-			propertymanager.Table:     propertymanager.ValidColumn,
-			structure.Table:           structure.ValidColumn,
-			unit.Table:                unit.ValidColumn,
-			unitpricing.Table:         unitpricing.ValidColumn,
-			user.Table:                user.ValidColumn,
+			agent.Table:                 agent.ValidColumn,
+			agentcommissionrule.Table:   agentcommissionrule.ValidColumn,
+			commissionrecord.Table:      commissionrecord.ValidColumn,
+			feetype.Table:               feetype.ValidColumn,
+			hostedsession.Table:         hostedsession.ValidColumn,
+			hostedsessiontemplate.Table: hostedsessiontemplate.ValidColumn,
+			lease.Table:                 lease.ValidColumn,
+			property.Table:              property.ValidColumn,
+			propertyfeerule.Table:       propertyfeerule.ValidColumn,
+			propertymanager.Table:       propertymanager.ValidColumn,
+			provider.Table:              provider.ValidColumn,
+			service.Table:               service.ValidColumn,
+			structure.Table:             structure.ValidColumn,
+			unit.Table:                  unit.ValidColumn,
+			unitpricing.Table:           unitpricing.ValidColumn,
+			user.Table:                  user.ValidColumn,
+			useridentity.Table:          useridentity.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

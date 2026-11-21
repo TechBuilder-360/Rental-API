@@ -18,6 +18,12 @@ type CommissionRecord func(*sql.Selector)
 // FeeType is the predicate function for feetype builders.
 type FeeType func(*sql.Selector)
 
+// HostedSession is the predicate function for hostedsession builders.
+type HostedSession func(*sql.Selector)
+
+// HostedSessionTemplate is the predicate function for hostedsessiontemplate builders.
+type HostedSessionTemplate func(*sql.Selector)
+
 // Lease is the predicate function for lease builders.
 type Lease func(*sql.Selector)
 
@@ -30,6 +36,12 @@ type PropertyFeeRule func(*sql.Selector)
 // PropertyManager is the predicate function for propertymanager builders.
 type PropertyManager func(*sql.Selector)
 
+// Provider is the predicate function for provider builders.
+type Provider func(*sql.Selector)
+
+// Service is the predicate function for service builders.
+type Service func(*sql.Selector)
+
 // Structure is the predicate function for structure builders.
 type Structure func(*sql.Selector)
 
@@ -41,3 +53,6 @@ type UnitPricing func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
+
+// UserIdentity is the predicate function for useridentity builders.
+type UserIdentity func(*sql.Selector)

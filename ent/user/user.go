@@ -27,6 +27,12 @@ const (
 	FieldDob = "dob"
 	// FieldPhoneNumber holds the string denoting the phone_number field in the database.
 	FieldPhoneNumber = "phone_number"
+	// FieldEmail holds the string denoting the email field in the database.
+	FieldEmail = "email"
+	// FieldEmailVerified holds the string denoting the email_verified field in the database.
+	FieldEmailVerified = "email_verified"
+	// FieldIdentityVerified holds the string denoting the identity_verified field in the database.
+	FieldIdentityVerified = "identity_verified"
 	// FieldPassword holds the string denoting the password field in the database.
 	FieldPassword = "password"
 	// FieldActive holds the string denoting the active field in the database.
@@ -37,6 +43,10 @@ const (
 	EdgeAgentProfile = "agent_profile"
 	// EdgeLeases holds the string denoting the leases edge name in mutations.
 	EdgeLeases = "leases"
+	// EdgeHostedSessions holds the string denoting the hosted_sessions edge name in mutations.
+	EdgeHostedSessions = "hosted_sessions"
+	// EdgeIdentities holds the string denoting the identities edge name in mutations.
+	EdgeIdentities = "identities"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// PropertyManagersTable is the table that holds the property_managers relation/edge.
@@ -60,6 +70,20 @@ const (
 	LeasesInverseTable = "leases"
 	// LeasesColumn is the table column denoting the leases relation/edge.
 	LeasesColumn = "user_id"
+	// HostedSessionsTable is the table that holds the hosted_sessions relation/edge.
+	HostedSessionsTable = "hosted_sessions"
+	// HostedSessionsInverseTable is the table name for the HostedSession entity.
+	// It exists in this package in order to avoid circular dependency with the "hostedsession" package.
+	HostedSessionsInverseTable = "hosted_sessions"
+	// HostedSessionsColumn is the table column denoting the hosted_sessions relation/edge.
+	HostedSessionsColumn = "user_id"
+	// IdentitiesTable is the table that holds the identities relation/edge.
+	IdentitiesTable = "user_identities"
+	// IdentitiesInverseTable is the table name for the UserIdentity entity.
+	// It exists in this package in order to avoid circular dependency with the "useridentity" package.
+	IdentitiesInverseTable = "user_identities"
+	// IdentitiesColumn is the table column denoting the identities relation/edge.
+	IdentitiesColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -71,6 +95,9 @@ var Columns = []string{
 	FieldLastName,
 	FieldDob,
 	FieldPhoneNumber,
+	FieldEmail,
+	FieldEmailVerified,
+	FieldIdentityVerified,
 	FieldPassword,
 	FieldActive,
 }
@@ -96,8 +123,12 @@ var (
 	FirstNameValidator func(string) error
 	// LastNameValidator is a validator for the "last_name" field. It is called by the builders before save.
 	LastNameValidator func(string) error
-	// PhoneNumberValidator is a validator for the "phone_number" field. It is called by the builders before save.
-	PhoneNumberValidator func(string) error
+	// EmailValidator is a validator for the "email" field. It is called by the builders before save.
+	EmailValidator func(string) error
+	// DefaultEmailVerified holds the default value on creation for the "email_verified" field.
+	DefaultEmailVerified bool
+	// DefaultIdentityVerified holds the default value on creation for the "identity_verified" field.
+	DefaultIdentityVerified bool
 	// PasswordValidator is a validator for the "password" field. It is called by the builders before save.
 	PasswordValidator func(string) error
 	// DefaultActive holds the default value on creation for the "active" field.
@@ -144,6 +175,21 @@ func ByPhoneNumber(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPhoneNumber, opts...).ToFunc()
 }
 
+// ByEmail orders the results by the email field.
+func ByEmail(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEmail, opts...).ToFunc()
+}
+
+// ByEmailVerified orders the results by the email_verified field.
+func ByEmailVerified(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEmailVerified, opts...).ToFunc()
+}
+
+// ByIdentityVerified orders the results by the identity_verified field.
+func ByIdentityVerified(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIdentityVerified, opts...).ToFunc()
+}
+
 // ByPassword orders the results by the password field.
 func ByPassword(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPassword, opts...).ToFunc()
@@ -188,6 +234,34 @@ func ByLeases(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newLeasesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByHostedSessionsCount orders the results by hosted_sessions count.
+func ByHostedSessionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newHostedSessionsStep(), opts...)
+	}
+}
+
+// ByHostedSessions orders the results by hosted_sessions terms.
+func ByHostedSessions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newHostedSessionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByIdentitiesCount orders the results by identities count.
+func ByIdentitiesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newIdentitiesStep(), opts...)
+	}
+}
+
+// ByIdentities orders the results by identities terms.
+func ByIdentities(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newIdentitiesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newPropertyManagersStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -207,5 +281,19 @@ func newLeasesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LeasesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LeasesTable, LeasesColumn),
+	)
+}
+func newHostedSessionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(HostedSessionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, HostedSessionsTable, HostedSessionsColumn),
+	)
+}
+func newIdentitiesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(IdentitiesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, IdentitiesTable, IdentitiesColumn),
 	)
 }

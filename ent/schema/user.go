@@ -32,8 +32,17 @@ func (User) Fields() []ent.Field {
 				dialect.Postgres: "date",
 			}),
 		field.String("phone_number").
+			Optional().
+			Nillable().
+			Unique(),
+		// email is stored normalized (trimmed, lower-cased) by the auth service.
+		field.String("email").
 			Unique().
 			NotEmpty(),
+		field.Bool("email_verified").
+			Default(false),
+		field.Bool("identity_verified").
+			Default(false),
 		field.String("password").
 			Sensitive().
 			NotEmpty(),
@@ -48,5 +57,7 @@ func (User) Edges() []ent.Edge {
 		edge.To("agent_profile", Agent.Type).
 			Unique(),
 		edge.To("leases", Lease.Type),
+		edge.To("hosted_sessions", HostedSession.Type),
+		edge.To("identities", UserIdentity.Type),
 	}
 }

@@ -20,6 +20,10 @@ type Tx struct {
 	CommissionRecord *CommissionRecordClient
 	// FeeType is the client for interacting with the FeeType builders.
 	FeeType *FeeTypeClient
+	// HostedSession is the client for interacting with the HostedSession builders.
+	HostedSession *HostedSessionClient
+	// HostedSessionTemplate is the client for interacting with the HostedSessionTemplate builders.
+	HostedSessionTemplate *HostedSessionTemplateClient
 	// Lease is the client for interacting with the Lease builders.
 	Lease *LeaseClient
 	// Property is the client for interacting with the Property builders.
@@ -28,6 +32,10 @@ type Tx struct {
 	PropertyFeeRule *PropertyFeeRuleClient
 	// PropertyManager is the client for interacting with the PropertyManager builders.
 	PropertyManager *PropertyManagerClient
+	// Provider is the client for interacting with the Provider builders.
+	Provider *ProviderClient
+	// Service is the client for interacting with the Service builders.
+	Service *ServiceClient
 	// Structure is the client for interacting with the Structure builders.
 	Structure *StructureClient
 	// Unit is the client for interacting with the Unit builders.
@@ -36,6 +44,8 @@ type Tx struct {
 	UnitPricing *UnitPricingClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// UserIdentity is the client for interacting with the UserIdentity builders.
+	UserIdentity *UserIdentityClient
 
 	// lazily loaded.
 	client     *Client
@@ -171,14 +181,19 @@ func (tx *Tx) init() {
 	tx.AgentCommissionRule = NewAgentCommissionRuleClient(tx.config)
 	tx.CommissionRecord = NewCommissionRecordClient(tx.config)
 	tx.FeeType = NewFeeTypeClient(tx.config)
+	tx.HostedSession = NewHostedSessionClient(tx.config)
+	tx.HostedSessionTemplate = NewHostedSessionTemplateClient(tx.config)
 	tx.Lease = NewLeaseClient(tx.config)
 	tx.Property = NewPropertyClient(tx.config)
 	tx.PropertyFeeRule = NewPropertyFeeRuleClient(tx.config)
 	tx.PropertyManager = NewPropertyManagerClient(tx.config)
+	tx.Provider = NewProviderClient(tx.config)
+	tx.Service = NewServiceClient(tx.config)
 	tx.Structure = NewStructureClient(tx.config)
 	tx.Unit = NewUnitClient(tx.config)
 	tx.UnitPricing = NewUnitPricingClient(tx.config)
 	tx.User = NewUserClient(tx.config)
+	tx.UserIdentity = NewUserIdentityClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

@@ -1,0 +1,67 @@
+type User {
+  id: UUID!
+  email: String!
+  email_verified: Boolean!
+  first_name: String!
+  last_name: String!
+  phone_number: String
+  dob: Time
+  active: Boolean!
+  created_at: Time!
+}
+
+type AuthPayload {
+  "Short-lived JWT. Send as `Authorization: Bearer <access_token>`."
+  access_token: String!
+  access_token_expires_at: Time!
+  "Long-lived, single-use token. Exchange it with `refresh_token` for a new pair."
+  refresh_token: String!
+  refresh_token_expires_at: Time!
+  token_type: String!
+  user: User!
+}
+
+type LoginPayload {
+  success: Boolean!
+  message: String!
+  expires_in_seconds: Int!
+}
+
+input SignUpInput {
+  email: String!
+  password: String!
+  first_name: String!
+  last_name: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input VerifyEmailOTPInput {
+  email: String!
+  code: String!
+}
+
+extend type Query {
+  "The authenticated user."
+  me: User! @auth
+}
+
+type Mutation {
+  "Register with email and password."
+  sign_up(input: SignUpInput!): AuthPayload!
+
+  "Verify email and password credentials, then dispatch a 6-digit OTP to the user's email."
+  login(input: LoginInput!): LoginPayload!
+
+  "Exchange the emailed OTP code for an authenticated session with access and refresh tokens."
+  verify_email_otp(input: VerifyEmailOTPInput!): AuthPayload!
+
+  "Rotate a refresh token: returns a new access token and a new refresh token."
+  refresh_token(refresh_token: String!): AuthPayload!
+
+  "Revoke the current session."
+  logout: Boolean! @auth
+}

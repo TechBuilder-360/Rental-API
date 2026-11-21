@@ -1,0 +1,15 @@
+scalar Time
+scalar UUID
+
+"Requires a valid `Authorization: Bearer <accessToken>` header."
+directive @auth on FIELD_DEFINITION
+
+type Health {
+  status: String!
+  timestamp: Time!
+}
+
+type Query {
+  "Liveness check for the GraphQL layer."
+  health: Health!
+}

@@ -119,6 +119,94 @@ var (
 		Columns:    FeeTypesColumns,
 		PrimaryKey: []*schema.Column{FeeTypesColumns[0]},
 	}
+	// HostedSessionsColumns holds the columns for the "hosted_sessions" table.
+	HostedSessionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "provider", Type: field.TypeString},
+		{Name: "session_id", Type: field.TypeString, Unique: true},
+		{Name: "session_token", Type: field.TypeString, Nullable: true},
+		{Name: "verification_url", Type: field.TypeString},
+		{Name: "vendor_data", Type: field.TypeString, Nullable: true},
+		{Name: "status", Type: field.TypeString, Default: "Created"},
+		{Name: "decision", Type: field.TypeString, Nullable: true},
+		{Name: "reason", Type: field.TypeString, Nullable: true},
+		{Name: "risk_score", Type: field.TypeFloat64, Nullable: true},
+		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
+		{Name: "verified_at", Type: field.TypeTime, Nullable: true},
+		{Name: "declined_at", Type: field.TypeTime, Nullable: true},
+		{Name: "template_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "user_id", Type: field.TypeUUID},
+	}
+	// HostedSessionsTable holds the schema information for the "hosted_sessions" table.
+	HostedSessionsTable = &schema.Table{
+		Name:       "hosted_sessions",
+		Columns:    HostedSessionsColumns,
+		PrimaryKey: []*schema.Column{HostedSessionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "hosted_sessions_hosted_session_templates_hosted_sessions",
+				Columns:    []*schema.Column{HostedSessionsColumns[15]},
+				RefColumns: []*schema.Column{HostedSessionTemplatesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "hosted_sessions_users_hosted_sessions",
+				Columns:    []*schema.Column{HostedSessionsColumns[16]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "hostedsession_session_id",
+				Unique:  true,
+				Columns: []*schema.Column{HostedSessionsColumns[4]},
+			},
+			{
+				Name:    "hostedsession_user_id_status",
+				Unique:  false,
+				Columns: []*schema.Column{HostedSessionsColumns[16], HostedSessionsColumns[8]},
+			},
+			{
+				Name:    "hostedsession_provider_status",
+				Unique:  false,
+				Columns: []*schema.Column{HostedSessionsColumns[3], HostedSessionsColumns[8]},
+			},
+		},
+	}
+	// HostedSessionTemplatesColumns holds the columns for the "hosted_session_templates" table.
+	HostedSessionTemplatesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString},
+		{Name: "provider", Type: field.TypeString},
+		{Name: "template_id", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Nullable: true},
+		{Name: "is_default", Type: field.TypeBool, Default: false},
+		{Name: "active", Type: field.TypeBool, Default: true},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+	}
+	// HostedSessionTemplatesTable holds the schema information for the "hosted_session_templates" table.
+	HostedSessionTemplatesTable = &schema.Table{
+		Name:       "hosted_session_templates",
+		Columns:    HostedSessionTemplatesColumns,
+		PrimaryKey: []*schema.Column{HostedSessionTemplatesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "hostedsessiontemplate_provider_template_id",
+				Unique:  true,
+				Columns: []*schema.Column{HostedSessionTemplatesColumns[4], HostedSessionTemplatesColumns[5]},
+			},
+			{
+				Name:    "hostedsessiontemplate_provider_is_default",
+				Unique:  false,
+				Columns: []*schema.Column{HostedSessionTemplatesColumns[4], HostedSessionTemplatesColumns[7]},
+			},
+		},
+	}
 	// LeasesColumns holds the columns for the "leases" table.
 	LeasesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -272,6 +360,37 @@ var (
 			},
 		},
 	}
+	// ProvidersColumns holds the columns for the "providers" table.
+	ProvidersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString},
+		{Name: "slug", Type: field.TypeString, Unique: true},
+		{Name: "active", Type: field.TypeBool, Default: true},
+	}
+	// ProvidersTable holds the schema information for the "providers" table.
+	ProvidersTable = &schema.Table{
+		Name:       "providers",
+		Columns:    ProvidersColumns,
+		PrimaryKey: []*schema.Column{ProvidersColumns[0]},
+	}
+	// ServicesColumns holds the columns for the "services" table.
+	ServicesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "identifier", Type: field.TypeString, Unique: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "provider", Type: field.TypeString, Nullable: true, Default: ""},
+		{Name: "disabled", Type: field.TypeBool, Default: false},
+	}
+	// ServicesTable holds the schema information for the "services" table.
+	ServicesTable = &schema.Table{
+		Name:       "services",
+		Columns:    ServicesColumns,
+		PrimaryKey: []*schema.Column{ServicesColumns[0]},
+	}
 	// StructuresColumns holds the columns for the "structures" table.
 	StructuresColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -361,7 +480,10 @@ var (
 		{Name: "first_name", Type: field.TypeString},
 		{Name: "last_name", Type: field.TypeString},
 		{Name: "dob", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "date"}},
-		{Name: "phone_number", Type: field.TypeString, Unique: true},
+		{Name: "phone_number", Type: field.TypeString, Unique: true, Nullable: true},
+		{Name: "email", Type: field.TypeString, Unique: true},
+		{Name: "email_verified", Type: field.TypeBool, Default: false},
+		{Name: "identity_verified", Type: field.TypeBool, Default: false},
 		{Name: "password", Type: field.TypeString},
 		{Name: "active", Type: field.TypeBool, Default: true},
 	}
@@ -371,20 +493,79 @@ var (
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
+	// UserIdentitiesColumns holds the columns for the "user_identities" table.
+	UserIdentitiesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "provider", Type: field.TypeString},
+		{Name: "first_name", Type: field.TypeString, Nullable: true},
+		{Name: "last_name", Type: field.TypeString, Nullable: true},
+		{Name: "dob", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "date"}},
+		{Name: "gender", Type: field.TypeString, Nullable: true},
+		{Name: "nationality", Type: field.TypeString, Nullable: true},
+		{Name: "document_type", Type: field.TypeString, Nullable: true},
+		{Name: "document_number", Type: field.TypeString, Nullable: true},
+		{Name: "document_country", Type: field.TypeString, Nullable: true},
+		{Name: "document_expiration", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "date"}},
+		{Name: "address", Type: field.TypeString, Nullable: true},
+		{Name: "is_verified", Type: field.TypeBool, Default: false},
+		{Name: "verified_at", Type: field.TypeTime, Nullable: true},
+		{Name: "raw_data", Type: field.TypeJSON, Nullable: true},
+		{Name: "hosted_session_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "user_id", Type: field.TypeUUID},
+	}
+	// UserIdentitiesTable holds the schema information for the "user_identities" table.
+	UserIdentitiesTable = &schema.Table{
+		Name:       "user_identities",
+		Columns:    UserIdentitiesColumns,
+		PrimaryKey: []*schema.Column{UserIdentitiesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "user_identities_hosted_sessions_identities",
+				Columns:    []*schema.Column{UserIdentitiesColumns[17]},
+				RefColumns: []*schema.Column{HostedSessionsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "user_identities_users_identities",
+				Columns:    []*schema.Column{UserIdentitiesColumns[18]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "useridentity_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{UserIdentitiesColumns[18]},
+			},
+			{
+				Name:    "useridentity_document_type_document_number",
+				Unique:  false,
+				Columns: []*schema.Column{UserIdentitiesColumns[9], UserIdentitiesColumns[10]},
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AgentsTable,
 		AgentCommissionRulesTable,
 		CommissionRecordsTable,
 		FeeTypesTable,
+		HostedSessionsTable,
+		HostedSessionTemplatesTable,
 		LeasesTable,
 		PropertiesTable,
 		PropertyFeeRulesTable,
 		PropertyManagersTable,
+		ProvidersTable,
+		ServicesTable,
 		StructuresTable,
 		UnitsTable,
 		UnitPricingTable,
 		UsersTable,
+		UserIdentitiesTable,
 	}
 )
 
@@ -395,6 +576,8 @@ func init() {
 	CommissionRecordsTable.ForeignKeys[0].RefTable = AgentsTable
 	CommissionRecordsTable.ForeignKeys[1].RefTable = AgentCommissionRulesTable
 	CommissionRecordsTable.ForeignKeys[2].RefTable = LeasesTable
+	HostedSessionsTable.ForeignKeys[0].RefTable = HostedSessionTemplatesTable
+	HostedSessionsTable.ForeignKeys[1].RefTable = UsersTable
 	LeasesTable.ForeignKeys[0].RefTable = AgentsTable
 	LeasesTable.ForeignKeys[1].RefTable = PropertiesTable
 	LeasesTable.ForeignKeys[2].RefTable = UnitsTable
@@ -405,10 +588,18 @@ func init() {
 	PropertyFeeRulesTable.ForeignKeys[3].RefTable = UnitsTable
 	PropertyManagersTable.ForeignKeys[0].RefTable = PropertiesTable
 	PropertyManagersTable.ForeignKeys[1].RefTable = UsersTable
+	ProvidersTable.Annotation = &entsql.Annotation{
+		Table: "providers",
+	}
+	ServicesTable.Annotation = &entsql.Annotation{
+		Table: "services",
+	}
 	StructuresTable.ForeignKeys[0].RefTable = PropertiesTable
 	UnitsTable.ForeignKeys[0].RefTable = StructuresTable
 	UnitPricingTable.ForeignKeys[0].RefTable = UnitsTable
 	UnitPricingTable.Annotation = &entsql.Annotation{
 		Table: "unit_pricing",
 	}
+	UserIdentitiesTable.ForeignKeys[0].RefTable = HostedSessionsTable
+	UserIdentitiesTable.ForeignKeys[1].RefTable = UsersTable
 }
