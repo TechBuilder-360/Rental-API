@@ -1,4 +1,4 @@
-package runtime
+package temporal
 
 import (
 	"go.temporal.io/sdk/client"

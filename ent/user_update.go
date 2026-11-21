@@ -12,10 +12,12 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/TechBuilder-360/Rental-API/ent/agent"
+	"github.com/TechBuilder-360/Rental-API/ent/hostedsession"
 	"github.com/TechBuilder-360/Rental-API/ent/lease"
 	"github.com/TechBuilder-360/Rental-API/ent/predicate"
 	"github.com/TechBuilder-360/Rental-API/ent/propertymanager"
 	"github.com/TechBuilder-360/Rental-API/ent/user"
+	"github.com/TechBuilder-360/Rental-API/ent/useridentity"
 	"github.com/google/uuid"
 )
 
@@ -100,6 +102,54 @@ func (_u *UserUpdate) SetNillablePhoneNumber(v *string) *UserUpdate {
 	return _u
 }
 
+// ClearPhoneNumber clears the value of the "phone_number" field.
+func (_u *UserUpdate) ClearPhoneNumber() *UserUpdate {
+	_u.mutation.ClearPhoneNumber()
+	return _u
+}
+
+// SetEmail sets the "email" field.
+func (_u *UserUpdate) SetEmail(v string) *UserUpdate {
+	_u.mutation.SetEmail(v)
+	return _u
+}
+
+// SetNillableEmail sets the "email" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableEmail(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetEmail(*v)
+	}
+	return _u
+}
+
+// SetEmailVerified sets the "email_verified" field.
+func (_u *UserUpdate) SetEmailVerified(v bool) *UserUpdate {
+	_u.mutation.SetEmailVerified(v)
+	return _u
+}
+
+// SetNillableEmailVerified sets the "email_verified" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableEmailVerified(v *bool) *UserUpdate {
+	if v != nil {
+		_u.SetEmailVerified(*v)
+	}
+	return _u
+}
+
+// SetIdentityVerified sets the "identity_verified" field.
+func (_u *UserUpdate) SetIdentityVerified(v bool) *UserUpdate {
+	_u.mutation.SetIdentityVerified(v)
+	return _u
+}
+
+// SetNillableIdentityVerified sets the "identity_verified" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableIdentityVerified(v *bool) *UserUpdate {
+	if v != nil {
+		_u.SetIdentityVerified(*v)
+	}
+	return _u
+}
+
 // SetPassword sets the "password" field.
 func (_u *UserUpdate) SetPassword(v string) *UserUpdate {
 	_u.mutation.SetPassword(v)
@@ -177,6 +227,36 @@ func (_u *UserUpdate) AddLeases(v ...*Lease) *UserUpdate {
 	return _u.AddLeaseIDs(ids...)
 }
 
+// AddHostedSessionIDs adds the "hosted_sessions" edge to the HostedSession entity by IDs.
+func (_u *UserUpdate) AddHostedSessionIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.AddHostedSessionIDs(ids...)
+	return _u
+}
+
+// AddHostedSessions adds the "hosted_sessions" edges to the HostedSession entity.
+func (_u *UserUpdate) AddHostedSessions(v ...*HostedSession) *UserUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddHostedSessionIDs(ids...)
+}
+
+// AddIdentityIDs adds the "identities" edge to the UserIdentity entity by IDs.
+func (_u *UserUpdate) AddIdentityIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.AddIdentityIDs(ids...)
+	return _u
+}
+
+// AddIdentities adds the "identities" edges to the UserIdentity entity.
+func (_u *UserUpdate) AddIdentities(v ...*UserIdentity) *UserUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddIdentityIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdate) Mutation() *UserMutation {
 	return _u.mutation
@@ -230,6 +310,48 @@ func (_u *UserUpdate) RemoveLeases(v ...*Lease) *UserUpdate {
 	return _u.RemoveLeaseIDs(ids...)
 }
 
+// ClearHostedSessions clears all "hosted_sessions" edges to the HostedSession entity.
+func (_u *UserUpdate) ClearHostedSessions() *UserUpdate {
+	_u.mutation.ClearHostedSessions()
+	return _u
+}
+
+// RemoveHostedSessionIDs removes the "hosted_sessions" edge to HostedSession entities by IDs.
+func (_u *UserUpdate) RemoveHostedSessionIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.RemoveHostedSessionIDs(ids...)
+	return _u
+}
+
+// RemoveHostedSessions removes "hosted_sessions" edges to HostedSession entities.
+func (_u *UserUpdate) RemoveHostedSessions(v ...*HostedSession) *UserUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveHostedSessionIDs(ids...)
+}
+
+// ClearIdentities clears all "identities" edges to the UserIdentity entity.
+func (_u *UserUpdate) ClearIdentities() *UserUpdate {
+	_u.mutation.ClearIdentities()
+	return _u
+}
+
+// RemoveIdentityIDs removes the "identities" edge to UserIdentity entities by IDs.
+func (_u *UserUpdate) RemoveIdentityIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.RemoveIdentityIDs(ids...)
+	return _u
+}
+
+// RemoveIdentities removes "identities" edges to UserIdentity entities.
+func (_u *UserUpdate) RemoveIdentities(v ...*UserIdentity) *UserUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveIdentityIDs(ids...)
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
 	_u.defaults()
@@ -278,9 +400,9 @@ func (_u *UserUpdate) check() error {
 			return &ValidationError{Name: "last_name", err: fmt.Errorf(`ent: validator failed for field "User.last_name": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.PhoneNumber(); ok {
-		if err := user.PhoneNumberValidator(v); err != nil {
-			return &ValidationError{Name: "phone_number", err: fmt.Errorf(`ent: validator failed for field "User.phone_number": %w`, err)}
+	if v, ok := _u.mutation.Email(); ok {
+		if err := user.EmailValidator(v); err != nil {
+			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.Password(); ok {
@@ -320,6 +442,18 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.PhoneNumber(); ok {
 		_spec.SetField(user.FieldPhoneNumber, field.TypeString, value)
+	}
+	if _u.mutation.PhoneNumberCleared() {
+		_spec.ClearField(user.FieldPhoneNumber, field.TypeString)
+	}
+	if value, ok := _u.mutation.Email(); ok {
+		_spec.SetField(user.FieldEmail, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.EmailVerified(); ok {
+		_spec.SetField(user.FieldEmailVerified, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.IdentityVerified(); ok {
+		_spec.SetField(user.FieldIdentityVerified, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Password(); ok {
 		_spec.SetField(user.FieldPassword, field.TypeString, value)
@@ -439,6 +573,96 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(lease.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.HostedSessionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.HostedSessionsTable,
+			Columns: []string{user.HostedSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hostedsession.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedHostedSessionsIDs(); len(nodes) > 0 && !_u.mutation.HostedSessionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.HostedSessionsTable,
+			Columns: []string{user.HostedSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hostedsession.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.HostedSessionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.HostedSessionsTable,
+			Columns: []string{user.HostedSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hostedsession.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.IdentitiesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IdentitiesTable,
+			Columns: []string{user.IdentitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(useridentity.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedIdentitiesIDs(); len(nodes) > 0 && !_u.mutation.IdentitiesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IdentitiesTable,
+			Columns: []string{user.IdentitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(useridentity.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.IdentitiesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IdentitiesTable,
+			Columns: []string{user.IdentitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(useridentity.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -534,6 +758,54 @@ func (_u *UserUpdateOne) SetNillablePhoneNumber(v *string) *UserUpdateOne {
 	return _u
 }
 
+// ClearPhoneNumber clears the value of the "phone_number" field.
+func (_u *UserUpdateOne) ClearPhoneNumber() *UserUpdateOne {
+	_u.mutation.ClearPhoneNumber()
+	return _u
+}
+
+// SetEmail sets the "email" field.
+func (_u *UserUpdateOne) SetEmail(v string) *UserUpdateOne {
+	_u.mutation.SetEmail(v)
+	return _u
+}
+
+// SetNillableEmail sets the "email" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableEmail(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetEmail(*v)
+	}
+	return _u
+}
+
+// SetEmailVerified sets the "email_verified" field.
+func (_u *UserUpdateOne) SetEmailVerified(v bool) *UserUpdateOne {
+	_u.mutation.SetEmailVerified(v)
+	return _u
+}
+
+// SetNillableEmailVerified sets the "email_verified" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableEmailVerified(v *bool) *UserUpdateOne {
+	if v != nil {
+		_u.SetEmailVerified(*v)
+	}
+	return _u
+}
+
+// SetIdentityVerified sets the "identity_verified" field.
+func (_u *UserUpdateOne) SetIdentityVerified(v bool) *UserUpdateOne {
+	_u.mutation.SetIdentityVerified(v)
+	return _u
+}
+
+// SetNillableIdentityVerified sets the "identity_verified" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableIdentityVerified(v *bool) *UserUpdateOne {
+	if v != nil {
+		_u.SetIdentityVerified(*v)
+	}
+	return _u
+}
+
 // SetPassword sets the "password" field.
 func (_u *UserUpdateOne) SetPassword(v string) *UserUpdateOne {
 	_u.mutation.SetPassword(v)
@@ -611,6 +883,36 @@ func (_u *UserUpdateOne) AddLeases(v ...*Lease) *UserUpdateOne {
 	return _u.AddLeaseIDs(ids...)
 }
 
+// AddHostedSessionIDs adds the "hosted_sessions" edge to the HostedSession entity by IDs.
+func (_u *UserUpdateOne) AddHostedSessionIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.AddHostedSessionIDs(ids...)
+	return _u
+}
+
+// AddHostedSessions adds the "hosted_sessions" edges to the HostedSession entity.
+func (_u *UserUpdateOne) AddHostedSessions(v ...*HostedSession) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddHostedSessionIDs(ids...)
+}
+
+// AddIdentityIDs adds the "identities" edge to the UserIdentity entity by IDs.
+func (_u *UserUpdateOne) AddIdentityIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.AddIdentityIDs(ids...)
+	return _u
+}
+
+// AddIdentities adds the "identities" edges to the UserIdentity entity.
+func (_u *UserUpdateOne) AddIdentities(v ...*UserIdentity) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddIdentityIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdateOne) Mutation() *UserMutation {
 	return _u.mutation
@@ -662,6 +964,48 @@ func (_u *UserUpdateOne) RemoveLeases(v ...*Lease) *UserUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveLeaseIDs(ids...)
+}
+
+// ClearHostedSessions clears all "hosted_sessions" edges to the HostedSession entity.
+func (_u *UserUpdateOne) ClearHostedSessions() *UserUpdateOne {
+	_u.mutation.ClearHostedSessions()
+	return _u
+}
+
+// RemoveHostedSessionIDs removes the "hosted_sessions" edge to HostedSession entities by IDs.
+func (_u *UserUpdateOne) RemoveHostedSessionIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.RemoveHostedSessionIDs(ids...)
+	return _u
+}
+
+// RemoveHostedSessions removes "hosted_sessions" edges to HostedSession entities.
+func (_u *UserUpdateOne) RemoveHostedSessions(v ...*HostedSession) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveHostedSessionIDs(ids...)
+}
+
+// ClearIdentities clears all "identities" edges to the UserIdentity entity.
+func (_u *UserUpdateOne) ClearIdentities() *UserUpdateOne {
+	_u.mutation.ClearIdentities()
+	return _u
+}
+
+// RemoveIdentityIDs removes the "identities" edge to UserIdentity entities by IDs.
+func (_u *UserUpdateOne) RemoveIdentityIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.RemoveIdentityIDs(ids...)
+	return _u
+}
+
+// RemoveIdentities removes "identities" edges to UserIdentity entities.
+func (_u *UserUpdateOne) RemoveIdentities(v ...*UserIdentity) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveIdentityIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -725,9 +1069,9 @@ func (_u *UserUpdateOne) check() error {
 			return &ValidationError{Name: "last_name", err: fmt.Errorf(`ent: validator failed for field "User.last_name": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.PhoneNumber(); ok {
-		if err := user.PhoneNumberValidator(v); err != nil {
-			return &ValidationError{Name: "phone_number", err: fmt.Errorf(`ent: validator failed for field "User.phone_number": %w`, err)}
+	if v, ok := _u.mutation.Email(); ok {
+		if err := user.EmailValidator(v); err != nil {
+			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.Password(); ok {
@@ -784,6 +1128,18 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.PhoneNumber(); ok {
 		_spec.SetField(user.FieldPhoneNumber, field.TypeString, value)
+	}
+	if _u.mutation.PhoneNumberCleared() {
+		_spec.ClearField(user.FieldPhoneNumber, field.TypeString)
+	}
+	if value, ok := _u.mutation.Email(); ok {
+		_spec.SetField(user.FieldEmail, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.EmailVerified(); ok {
+		_spec.SetField(user.FieldEmailVerified, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.IdentityVerified(); ok {
+		_spec.SetField(user.FieldIdentityVerified, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Password(); ok {
 		_spec.SetField(user.FieldPassword, field.TypeString, value)
@@ -903,6 +1259,96 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(lease.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.HostedSessionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.HostedSessionsTable,
+			Columns: []string{user.HostedSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hostedsession.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedHostedSessionsIDs(); len(nodes) > 0 && !_u.mutation.HostedSessionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.HostedSessionsTable,
+			Columns: []string{user.HostedSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hostedsession.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.HostedSessionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.HostedSessionsTable,
+			Columns: []string{user.HostedSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hostedsession.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.IdentitiesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IdentitiesTable,
+			Columns: []string{user.IdentitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(useridentity.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedIdentitiesIDs(); len(nodes) > 0 && !_u.mutation.IdentitiesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IdentitiesTable,
+			Columns: []string{user.IdentitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(useridentity.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.IdentitiesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IdentitiesTable,
+			Columns: []string{user.IdentitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(useridentity.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

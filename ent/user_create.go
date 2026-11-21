@@ -11,9 +11,11 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/TechBuilder-360/Rental-API/ent/agent"
+	"github.com/TechBuilder-360/Rental-API/ent/hostedsession"
 	"github.com/TechBuilder-360/Rental-API/ent/lease"
 	"github.com/TechBuilder-360/Rental-API/ent/propertymanager"
 	"github.com/TechBuilder-360/Rental-API/ent/user"
+	"github.com/TechBuilder-360/Rental-API/ent/useridentity"
 	"github.com/google/uuid"
 )
 
@@ -81,6 +83,48 @@ func (_c *UserCreate) SetNillableDob(v *time.Time) *UserCreate {
 // SetPhoneNumber sets the "phone_number" field.
 func (_c *UserCreate) SetPhoneNumber(v string) *UserCreate {
 	_c.mutation.SetPhoneNumber(v)
+	return _c
+}
+
+// SetNillablePhoneNumber sets the "phone_number" field if the given value is not nil.
+func (_c *UserCreate) SetNillablePhoneNumber(v *string) *UserCreate {
+	if v != nil {
+		_c.SetPhoneNumber(*v)
+	}
+	return _c
+}
+
+// SetEmail sets the "email" field.
+func (_c *UserCreate) SetEmail(v string) *UserCreate {
+	_c.mutation.SetEmail(v)
+	return _c
+}
+
+// SetEmailVerified sets the "email_verified" field.
+func (_c *UserCreate) SetEmailVerified(v bool) *UserCreate {
+	_c.mutation.SetEmailVerified(v)
+	return _c
+}
+
+// SetNillableEmailVerified sets the "email_verified" field if the given value is not nil.
+func (_c *UserCreate) SetNillableEmailVerified(v *bool) *UserCreate {
+	if v != nil {
+		_c.SetEmailVerified(*v)
+	}
+	return _c
+}
+
+// SetIdentityVerified sets the "identity_verified" field.
+func (_c *UserCreate) SetIdentityVerified(v bool) *UserCreate {
+	_c.mutation.SetIdentityVerified(v)
+	return _c
+}
+
+// SetNillableIdentityVerified sets the "identity_verified" field if the given value is not nil.
+func (_c *UserCreate) SetNillableIdentityVerified(v *bool) *UserCreate {
+	if v != nil {
+		_c.SetIdentityVerified(*v)
+	}
 	return _c
 }
 
@@ -167,6 +211,36 @@ func (_c *UserCreate) AddLeases(v ...*Lease) *UserCreate {
 	return _c.AddLeaseIDs(ids...)
 }
 
+// AddHostedSessionIDs adds the "hosted_sessions" edge to the HostedSession entity by IDs.
+func (_c *UserCreate) AddHostedSessionIDs(ids ...uuid.UUID) *UserCreate {
+	_c.mutation.AddHostedSessionIDs(ids...)
+	return _c
+}
+
+// AddHostedSessions adds the "hosted_sessions" edges to the HostedSession entity.
+func (_c *UserCreate) AddHostedSessions(v ...*HostedSession) *UserCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddHostedSessionIDs(ids...)
+}
+
+// AddIdentityIDs adds the "identities" edge to the UserIdentity entity by IDs.
+func (_c *UserCreate) AddIdentityIDs(ids ...uuid.UUID) *UserCreate {
+	_c.mutation.AddIdentityIDs(ids...)
+	return _c
+}
+
+// AddIdentities adds the "identities" edges to the UserIdentity entity.
+func (_c *UserCreate) AddIdentities(v ...*UserIdentity) *UserCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddIdentityIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_c *UserCreate) Mutation() *UserMutation {
 	return _c.mutation
@@ -210,6 +284,14 @@ func (_c *UserCreate) defaults() {
 		v := user.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.EmailVerified(); !ok {
+		v := user.DefaultEmailVerified
+		_c.mutation.SetEmailVerified(v)
+	}
+	if _, ok := _c.mutation.IdentityVerified(); !ok {
+		v := user.DefaultIdentityVerified
+		_c.mutation.SetIdentityVerified(v)
+	}
 	if _, ok := _c.mutation.Active(); !ok {
 		v := user.DefaultActive
 		_c.mutation.SetActive(v)
@@ -244,13 +326,19 @@ func (_c *UserCreate) check() error {
 			return &ValidationError{Name: "last_name", err: fmt.Errorf(`ent: validator failed for field "User.last_name": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.PhoneNumber(); !ok {
-		return &ValidationError{Name: "phone_number", err: errors.New(`ent: missing required field "User.phone_number"`)}
+	if _, ok := _c.mutation.Email(); !ok {
+		return &ValidationError{Name: "email", err: errors.New(`ent: missing required field "User.email"`)}
 	}
-	if v, ok := _c.mutation.PhoneNumber(); ok {
-		if err := user.PhoneNumberValidator(v); err != nil {
-			return &ValidationError{Name: "phone_number", err: fmt.Errorf(`ent: validator failed for field "User.phone_number": %w`, err)}
+	if v, ok := _c.mutation.Email(); ok {
+		if err := user.EmailValidator(v); err != nil {
+			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.EmailVerified(); !ok {
+		return &ValidationError{Name: "email_verified", err: errors.New(`ent: missing required field "User.email_verified"`)}
+	}
+	if _, ok := _c.mutation.IdentityVerified(); !ok {
+		return &ValidationError{Name: "identity_verified", err: errors.New(`ent: missing required field "User.identity_verified"`)}
 	}
 	if _, ok := _c.mutation.Password(); !ok {
 		return &ValidationError{Name: "password", err: errors.New(`ent: missing required field "User.password"`)}
@@ -320,7 +408,19 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := _c.mutation.PhoneNumber(); ok {
 		_spec.SetField(user.FieldPhoneNumber, field.TypeString, value)
-		_node.PhoneNumber = value
+		_node.PhoneNumber = &value
+	}
+	if value, ok := _c.mutation.Email(); ok {
+		_spec.SetField(user.FieldEmail, field.TypeString, value)
+		_node.Email = value
+	}
+	if value, ok := _c.mutation.EmailVerified(); ok {
+		_spec.SetField(user.FieldEmailVerified, field.TypeBool, value)
+		_node.EmailVerified = value
+	}
+	if value, ok := _c.mutation.IdentityVerified(); ok {
+		_spec.SetField(user.FieldIdentityVerified, field.TypeBool, value)
+		_node.IdentityVerified = value
 	}
 	if value, ok := _c.mutation.Password(); ok {
 		_spec.SetField(user.FieldPassword, field.TypeString, value)
@@ -371,6 +471,38 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(lease.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.HostedSessionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.HostedSessionsTable,
+			Columns: []string{user.HostedSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hostedsession.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.IdentitiesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IdentitiesTable,
+			Columns: []string{user.IdentitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(useridentity.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

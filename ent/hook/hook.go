@@ -57,6 +57,30 @@ func (f FeeTypeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FeeTypeMutation", m)
 }
 
+// The HostedSessionFunc type is an adapter to allow the use of ordinary
+// function as HostedSession mutator.
+type HostedSessionFunc func(context.Context, *ent.HostedSessionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f HostedSessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.HostedSessionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.HostedSessionMutation", m)
+}
+
+// The HostedSessionTemplateFunc type is an adapter to allow the use of ordinary
+// function as HostedSessionTemplate mutator.
+type HostedSessionTemplateFunc func(context.Context, *ent.HostedSessionTemplateMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f HostedSessionTemplateFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.HostedSessionTemplateMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.HostedSessionTemplateMutation", m)
+}
+
 // The LeaseFunc type is an adapter to allow the use of ordinary
 // function as Lease mutator.
 type LeaseFunc func(context.Context, *ent.LeaseMutation) (ent.Value, error)
@@ -105,6 +129,30 @@ func (f PropertyManagerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Va
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PropertyManagerMutation", m)
 }
 
+// The ProviderFunc type is an adapter to allow the use of ordinary
+// function as Provider mutator.
+type ProviderFunc func(context.Context, *ent.ProviderMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ProviderFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ProviderMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProviderMutation", m)
+}
+
+// The ServiceFunc type is an adapter to allow the use of ordinary
+// function as Service mutator.
+type ServiceFunc func(context.Context, *ent.ServiceMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ServiceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ServiceMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ServiceMutation", m)
+}
+
 // The StructureFunc type is an adapter to allow the use of ordinary
 // function as Structure mutator.
 type StructureFunc func(context.Context, *ent.StructureMutation) (ent.Value, error)
@@ -151,6 +199,18 @@ func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
+}
+
+// The UserIdentityFunc type is an adapter to allow the use of ordinary
+// function as UserIdentity mutator.
+type UserIdentityFunc func(context.Context, *ent.UserIdentityMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UserIdentityFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.UserIdentityMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserIdentityMutation", m)
 }
 
 // Condition is a hook condition function.
